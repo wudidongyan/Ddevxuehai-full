@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学海大陆 · 异世界冒险</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 内页整页背景（迷雾地图/委托板/编年史/静思庭，与大厅 scene-bg 同款） -->
+  <img src="img/opt/bg-map.png" alt="" class="page-bg page-bg--map" aria-hidden="true">
+  <img src="img/opt/bg-board.png" alt="" class="page-bg page-bg--board" aria-hidden="true">
+  <img src="img/opt/bg-chronicle.png" alt="" class="page-bg page-bg--chronicle" aria-hidden="true">
+  <img src="img/opt/bg-garden.png" alt="" class="page-bg page-bg--garden" aria-hidden="true">
+  <div class="page-bg-shade" aria-hidden="true"></div>
+
+  <!-- 黑场过场遮罩 -->
+  <div id="transition-overlay" aria-hidden="true"></div>
+
+  <!-- 全屏飘字层 -->
+  <div id="float-text-layer" aria-hidden="true"></div>
+
+  <!-- 提示条容器 -->
+  <div id="toast-layer" aria-hidden="true"></div>
+
+  <!-- 手机竖屏旋转遮罩（仅触屏 + 竖屏时显示） -->
+  <div id="rotate-overlay" class="rotate-overlay">
+    <div class="rotate-visual">
+      <div class="rotate-phone">
+        <div class="rotate-phone-screen"></div>
+        <div class="rotate-phone-home"></div>
+      </div>
+      <svg class="rotate-arrow" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 10 A40 40 0 1 1 10 50" fill="none" stroke="#ffd700" stroke-width="5" stroke-dasharray="10 8"/>
+        <path d="M3 44 L10 50 L17 44" fill="none" stroke="#ffd700" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <p class="rotate-text zh">请旋转手机，横屏开始冒险</p>
+  </div>
+
+  <!-- ============ 标题页 ============ -->
+  <section id="screen-title" class="screen active">
+    <div id="starfield" aria-hidden="true"></div>
+    <div class="title-content">
+      <p class="title-sub zh">— 异世界冒险 · 迷雾远征 —</p>
+      <h1 class="game-title">学海大陆</h1>
+      <p class="title-tag zh">在迷雾中点亮节点，征服属于你的大陆</p>
+      <button id="btn-start" class="pixel-btn pixel-btn-big">开始冒险</button>
+      <p class="title-foot zh">存档保存在本机 · 可在「乾坤袋」导出备份 · 未来正式版可完整继承</p>
+    </div>
+  </section>
+
+  <!-- ============ 契约仪式 其一：名号 ============ -->
+  <section id="screen-ritual-1" class="screen ritual-screen">
+    <div class="ritual-card pixel-panel">
+      <p class="ritual-step">契约仪式 · 其一</p>
+      <h2 class="ritual-title zh">起誓之前，先告诉我你的名号</h2>
+      <p class="ritual-desc zh">这个名号将刻入契约，伴随你踏上整片大陆</p>
+      <input id="input-name" class="pixel-input" type="text" maxlength="12"
+             placeholder="输入冒险者名号（1~12 字）" autocomplete="off">
+      <p id="name-error" class="ritual-error zh" aria-live="polite"></p>
+      <div class="ritual-actions">
+        <button id="btn-name-next" class="pixel-btn">下一步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 契约仪式 其二：职业 ============ -->
+  <section id="screen-ritual-2" class="screen ritual-screen">
+    <div class="ritual-card ritual-card-wide pixel-panel">
+      <p class="ritual-step">契约仪式 · 其二</p>
+      <h2 class="ritual-title zh">选择你的职业</h2>
+      <p class="ritual-desc zh">职业只是身份的装点，并不改变征服的难度</p>
+      <div id="class-list" class="class-list"></div>
+      <div class="ritual-actions">
+        <button id="btn-class-prev" class="pixel-btn pixel-btn-ghost">上一步</button>
+        <button id="btn-class-next" class="pixel-btn">下一步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 契约仪式 其三：誓言 ============ -->
+  <section id="screen-ritual-3" class="screen ritual-screen">
+    <div class="ritual-card pixel-panel">
+      <p class="ritual-step">契约仪式 · 其三</p>
+      <h2 class="ritual-title zh">立下你的冒险誓言</h2>
+      <p class="ritual-desc zh">写下一句属于你的宣言，它会陪你走过每一次远征</p>
+      <textarea id="input-oath" class="pixel-input pixel-textarea" maxlength="60"
+                placeholder="写下你的誓言…（可留空）"></textarea>
+      <div class="ritual-actions">
+        <button id="btn-oath-prev" class="pixel-btn pixel-btn-ghost">上一步</button>
+        <button id="btn-oath-next" class="pixel-btn">下一步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 契约仪式 终章：血手印 ============ -->
+  <section id="screen-ritual-4" class="screen ritual-screen">
+    <div class="ritual-card pixel-panel">
+      <p class="ritual-step">契约仪式 · 终章</p>
+      <h2 class="ritual-title zh">缔结契约</h2>
+      <p class="ritual-desc zh">将你的血手印按在契约之上，长按 2 秒</p>
+      <div id="contract-preview" class="contract-preview zh"></div>
+      <div id="handprint-zone" class="handprint-zone" role="button" aria-label="长按缔结契约">
+        <svg class="handprint-svg" viewBox="0 0 100 120" shape-rendering="crispEdges">
+          <ellipse cx="22" cy="34" rx="7" ry="20" fill="#e94560"/>
+          <ellipse cx="40" cy="23" rx="7" ry="24" fill="#e94560"/>
+          <ellipse cx="60" cy="23" rx="7" ry="24" fill="#e94560"/>
+          <ellipse cx="78" cy="34" rx="7" ry="20" fill="#e94560"/>
+          <ellipse cx="13" cy="63" rx="8" ry="15" fill="#e94560" transform="rotate(-28 13 63)"/>
+          <ellipse cx="50" cy="85" rx="28" ry="26" fill="#e94560"/>
+          <ellipse cx="42" cy="77" rx="10" ry="6" fill="#ff7b8a" opacity="0.55"/>
+          <rect x="36" y="112" width="6" height="8" fill="#e94560"/>
+          <rect x="48" y="114" width="5" height="6" fill="#e94560"/>
+        </svg>
+        <div id="handprint-progress" class="handprint-progress"></div>
+      </div>
+      <p id="handprint-hint" class="handprint-hint zh">按住不放，直至契约生效</p>
+      <div class="ritual-actions">
+        <button id="btn-contract-prev" class="pixel-btn pixel-btn-ghost">上一步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 公会大厅 ============ -->
+  <section id="screen-hall" class="screen hall-screen">
+    <div class="hall-wrap">
+      <header class="status-bar pixel-panel">
+        <div class="status-cell status-identity">
+          <span id="status-name" class="status-name"></span>
+          <span id="status-class" class="status-class"></span>
+        </div>
+        <div class="status-cell status-growth">
+          <span id="status-level" class="status-level"></span>
+          <div class="exp-wrap">
+            <div class="exp-bar"><div id="exp-fill" class="exp-fill"></div></div>
+            <span id="exp-text" class="exp-text"></span>
+          </div>
+        </div>
+        <div class="status-cell status-wealth">
+          <span id="status-gold" class="status-gold"></span>
+          <span id="status-power" class="status-power"></span>
+          <span id="status-target" class="status-target"></span>
+        </div>
+        <div class="status-cell status-reset">
+          <button id="btn-reset" class="pixel-btn pixel-btn-ghost pixel-btn-sm" title="重置存档">重置存档</button>
+          <button id="btn-qiankun" class="pixel-btn pixel-btn-ghost pixel-btn-sm" title="导出 / 导入存档">乾坤袋</button>
+        </div>
+        <div class="status-cell status-mute">
+          <button id="btn-mute" type="button" class="mute-btn" title="静音 / 开启声音" aria-label="静音开关">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 9v6h3l4 3.5V5.5L7 9H4z" fill="currentColor"/>
+              <path d="M15 8.5a4 4 0 0 1 0 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M17.5 5.5a8 8 0 0 1 0 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line class="slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="#e94560" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="ultimate-banner" class="ultimate-banner hidden">
+        <span class="ultimate-banner-label zh">终极远征</span>
+        <span id="ultimate-banner-name" class="ultimate-banner-name"></span>
+        <span id="ultimate-banner-progress" class="ultimate-banner-progress"></span>
+        <span id="ultimate-banner-days" class="ultimate-banner-days zh"></span>
+      </div>
+
+      <div id="hall-scene" class="hall-scene pixel-panel">
+        <img src="img/opt/hall-bg.png" alt="" class="scene-bg">
+        <div class="scene-fire-glow" aria-hidden="true"></div>
+
+        <div class="station station-map" data-hint="点亮迷雾节点，征服属于你的大陆">
+          <div class="station-icon">
+            <img src="img/icon-map.png" alt="迷雾地图" class="station-img">
+          </div>
+          <div class="station-label">迷雾地图</div>
+        </div>
+
+        <div class="station station-board" data-hint="接下试炼委托，赢取金币与经验">
+          <div class="station-icon">
+            <img src="img/icon-board.png" alt="委托板" class="station-img">
+          </div>
+          <div class="station-label">委托板</div>
+        </div>
+
+        <div class="station station-settle" data-hint="翻开编年史，记录你的远征">
+          <div class="station-icon">
+            <img src="img/icon-chronicle.png" alt="编年史" class="station-img">
+          </div>
+          <div class="station-label">编年史</div>
+        </div>
+
+        <div class="station station-meditate" data-hint="静思发愿，反思今日">
+          <div class="station-icon">
+            <img src="img/icon-garden.png" alt="静思庭" class="station-img">
+          </div>
+          <div class="station-label">静思庭</div>
+        </div>
+      </div>
+
+      <div class="npc-dialog pixel-panel">
+        <div class="npc-avatar" id="npc-avatar">
+          <img src="img/opt/ada-smile.png" alt="阿黛" class="npc-avatar-img">
+        </div>
+        <div id="npc-bubble" class="npc-bubble">
+          <div class="npc-name">阿黛 · 远征向导</div>
+          <div id="npc-text" class="npc-text zh"></div>
+          <div class="npc-hint zh">点击气泡，听阿黛说点别的</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ 大陆列表 ============ -->
+  <section id="screen-continents" class="screen">
+    <div class="continents-wrap">
+      <header class="page-header">
+        <button id="btn-continents-back" class="pixel-btn pixel-btn-ghost pixel-btn-sm">← 返回大厅</button>
+        <h1 class="page-title">大陆远征</h1>
+      </header>
+      <div id="continent-list" class="continent-list"></div>
+      <div id="continent-empty" class="continent-empty zh">还没有大陆，开辟第一块大陆，开始你的远征吧。</div>
+      <button id="btn-new-continent" class="pixel-btn">＋ 开辟新大陆</button>
+    </div>
+  </section>
+
+  <!-- ============ 迷雾地图 ============ -->
+  <section id="screen-map" class="screen">
+    <div class="map-wrap">
+      <header class="map-topbar">
+        <button id="btn-map-back" class="pixel-btn pixel-btn-ghost pixel-btn-sm">← 返回</button>
+        <div class="map-continent-name" id="map-continent-name"></div>
+        <span id="map-continent-status" class="badge"></span>
+        <span id="map-bounty" class="bounty zh"></span>
+      </header>
+      <nav id="map-breadcrumb" class="map-breadcrumb"></nav>
+      <div id="current-region-card" class="current-region-card pixel-panel">
+        <div class="cr-head">
+          <span class="cr-name" id="current-region-name"></span>
+          <span class="cr-badge">区域</span>
+        </div>
+        <div class="cr-stats">
+          <span id="current-region-counter" class="cr-counter zh"></span>
+          <span id="current-region-power" class="cr-power"></span>
+        </div>
+        <div class="cr-bar"><div id="current-region-fill" class="cr-fill"></div></div>
+      </div>
+      <div id="map-children" class="map-children"></div>
+      <div id="map-empty" class="map-empty zh">此区域尚无节点，点击「增设节点」开始远征。</div>
+      <footer class="map-actions">
+        <button id="btn-add-node" class="pixel-btn">＋ 增设节点</button>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ 委托板 ============ -->
+  <section id="screen-quests" class="screen">
+    <div class="quests-wrap">
+      <header class="page-header">
+        <button id="btn-quests-back" class="pixel-btn pixel-btn-ghost pixel-btn-sm">← 返回大厅</button>
+        <h1 class="page-title">委托板</h1>
+        <span id="quest-bounty" class="bounty zh">今日委托赏金 0/30</span>
+      </header>
+      <div class="quest-section">
+        <div class="quest-section-title zh">每日打卡 <span class="quest-section-count" id="checkin-count">· 0</span></div>
+        <div id="checkin-list" class="quest-list"></div>
+        <div id="checkin-empty" class="quest-empty-hint zh">还没有打卡委托，发布一个开始打卡吧</div>
+      </div>
+
+      <div class="quest-section">
+        <div class="quest-section-title zh">自由记录 <span class="quest-section-count" id="record-count">· 0</span></div>
+        <div id="record-list" class="quest-list"></div>
+        <div id="record-empty" class="quest-empty-hint zh">还没有记录型委托，建一个开始留痕</div>
+      </div>
+
+      <button id="btn-add-quest" class="pixel-btn">＋ 发布委托</button>
+    </div>
+  </section>
+
+  <!-- ============ 勇者传记 ============ -->
+  <section id="screen-settle" class="screen">
+    <div class="settle-wrap">
+      <header class="page-header">
+        <button id="btn-settle-back" class="pixel-btn pixel-btn-ghost pixel-btn-sm">← 返回大厅</button>
+        <h1 class="page-title">勇者传记</h1>
+      </header>
+      <div id="settle-report" class="settle-report pixel-panel"></div>
+      <div class="settle-log">
+        <h2 class="settle-subtitle zh">冒险日志</h2>
+        <textarea id="settle-note" class="pixel-input pixel-textarea zh" maxlength="500" placeholder="写下今日的远征总结……"></textarea>
+        <div class="settle-log-actions">
+          <button id="btn-save-note" class="pixel-btn">写入编年史</button>
+        </div>
+      </div>
+      <div class="chronicle">
+        <h2 class="settle-subtitle zh">编年史</h2>
+        <div id="chronicle-list" class="chronicle-list"></div>
+        <div id="chronicle-empty" class="continent-empty zh">编年史空空如也，写下你的第一篇远征记录吧。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 静思庭 ============ -->
+  <section id="screen-meditation" class="screen">
+    <div class="meditation-wrap">
+      <header class="page-header">
+        <button id="btn-meditation-back" class="pixel-btn pixel-btn-ghost pixel-btn-sm">← 返回大厅</button>
+        <h1 class="page-title">静思庭</h1>
+      </header>
+
+      <div class="med-vow pixel-panel">
+        <h2 class="med-subtitle zh">今日发愿</h2>
+        <div id="vow-form">
+          <label class="modal-label zh">今日为何启程？</label>
+          <input id="vow-text" class="pixel-input" type="text" maxlength="30" placeholder="今日为何启程？" autocomplete="off">
+          <label class="modal-label zh">今日想斩获多少战力？</label>
+          <input id="vow-target" class="pixel-input" type="number" min="1" placeholder="如：100">
+          <p id="vow-error" class="ritual-error zh"></p>
+          <div class="med-actions">
+            <button id="btn-vow-submit" class="pixel-btn">发愿启程</button>
+          </div>
+        </div>
+        <div id="vow-done" class="hidden">
+          <div class="med-vow-done-text zh" id="vow-done-text"></div>
+          <div class="med-vow-done-target" id="vow-done-target"></div>
+        </div>
+      </div>
+
+      <div class="med-reflect pixel-panel">
+        <h2 class="med-subtitle zh">随时反思</h2>
+        <textarea id="reflect-text" class="pixel-input pixel-textarea zh" maxlength="200" placeholder="写下此刻的反思……"></textarea>
+        <div class="med-actions">
+          <button id="btn-reflect-submit" class="pixel-btn">记录反思</button>
+        </div>
+      </div>
+
+      <div class="med-history">
+        <h2 class="med-subtitle zh">历史</h2>
+        <div id="meditation-history" class="meditation-history"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 弹窗：发布委托 ============ -->
+  <div id="quest-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">发布委托</h3>
+      <label class="modal-label zh">委托名号</label>
+      <input id="quest-name" class="pixel-input" type="text" maxlength="12" placeholder="如：深渊远征" autocomplete="off">
+      <label class="modal-label zh">类型</label>
+      <div class="type-toggle">
+        <button id="quest-type-checkin" class="pixel-btn pixel-btn-sm type-btn active">打卡型</button>
+        <button id="quest-type-record" class="pixel-btn pixel-btn-sm type-btn">记录型</button>
+      </div>
+      <label class="modal-label zh">执念 <span class="modal-hint zh">此战所图为何？</span></label>
+      <input id="quest-motive" class="pixel-input" type="text" maxlength="30" placeholder="如：为了登顶大陆之巅" autocomplete="off">
+      <label class="modal-label zh">战力值</label>
+      <input id="quest-power" class="pixel-input" type="number" min="1" max="9999" placeholder="战力值（1~9999）">
+      <div id="checkin-fields" class="hidden">
+        <label class="modal-label zh">下限 <span class="modal-hint zh">每日最低目标</span></label>
+        <input id="quest-min" class="pixel-input" type="number" min="1" step="0.1" placeholder="如：10">
+        <label class="modal-label zh">单位名</label>
+        <input id="quest-unit" class="pixel-input" type="text" maxlength="8" placeholder="如：次">
+      </div>
+      <p id="quest-modal-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-quest-cancel" class="pixel-btn pixel-btn-ghost">取消</button>
+        <button id="btn-quest-confirm" class="pixel-btn">发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：记录战果（记录型委托） ============ -->
+  <div id="record-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">记录战果</h3>
+      <p class="modal-sub zh" id="record-modal-name"></p>
+      <label class="modal-label zh">本次数量</label>
+      <input id="record-amount" class="pixel-input" type="number" min="1" step="0.1" placeholder="本次数量" autocomplete="off">
+      <label class="modal-label zh">备注（可选）</label>
+      <input id="record-note" class="pixel-input" type="text" maxlength="60" placeholder="一句可选备注">
+      <p id="record-modal-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-record-cancel" class="pixel-btn pixel-btn-ghost">取消</button>
+        <button id="btn-record-confirm" class="pixel-btn">记录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：开辟新大陆 ============ -->
+  <div id="continent-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">开辟新大陆</h3>
+      <p class="modal-sub zh">为这片等待征服的大陆命名</p>
+      <input id="continent-name-input" class="pixel-input" type="text" maxlength="12" placeholder="大陆之名（1~12 字）" autocomplete="off">
+      <label class="modal-label zh">征服理由</label>
+      <input id="continent-reason" class="pixel-input" type="text" maxlength="30" placeholder="为何要征服这片大陆？" autocomplete="off">
+      <label class="modal-label zh">决战之日 <span class="modal-hint zh">可选</span></label>
+      <input id="continent-battleday" class="pixel-input" type="date">
+      <p id="continent-modal-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-continent-cancel" class="pixel-btn pixel-btn-ghost">取消</button>
+        <button id="btn-continent-confirm" class="pixel-btn">开辟</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：执念 / 征服理由 ============ -->
+  <div id="motive-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">执念</h3>
+      <p id="motive-modal-text" class="motive-full zh"></p>
+      <div class="modal-actions">
+        <button id="btn-motive-close" class="pixel-btn pixel-btn-ghost">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：决战之日 ============ -->
+  <div id="battleday-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">决战之日</h3>
+      <p class="modal-sub zh" id="battleday-modal-name"></p>
+      <input id="battleday-input" class="pixel-input" type="date">
+      <p id="battleday-modal-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-battleday-cancel" class="pixel-btn pixel-btn-ghost">取消</button>
+        <button id="btn-battleday-confirm" class="pixel-btn">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：远征易帜 ============ -->
+  <div id="ultimate-confirm-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">远征易帜</h3>
+      <p class="modal-sub zh">远征易帜，确定吗？旧终极将降为普通大陆。</p>
+      <div class="modal-actions">
+        <button id="btn-ultimate-cancel" class="pixel-btn pixel-btn-ghost">再想想</button>
+        <button id="btn-ultimate-confirm" class="pixel-btn pixel-btn-danger">钦定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：增设节点 ============ -->
+  <div id="node-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">增设节点</h3>
+      <label class="modal-label zh">节点名号</label>
+      <input id="node-name" class="pixel-input" type="text" maxlength="12" placeholder="如：迷雾森林 / 深渊试炼" autocomplete="off">
+      <label class="modal-label zh">节点类型</label>
+      <div class="type-toggle">
+        <button id="type-region" class="pixel-btn pixel-btn-sm type-btn active">区域（可拆解）</button>
+        <button id="type-trial" class="pixel-btn pixel-btn-sm type-btn">试炼（叶子）</button>
+      </div>
+      <div id="power-field" class="power-field hidden">
+        <label class="modal-label zh">战力值</label>
+        <input id="node-power" class="pixel-input" type="number" min="1" max="9999" placeholder="战力值（1~9999）">
+      </div>
+      <p id="node-modal-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-node-cancel" class="pixel-btn pixel-btn-ghost">取消</button>
+        <button id="btn-node-confirm" class="pixel-btn">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：删除节点 ============ -->
+  <div id="delete-modal-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">焚毁节点</h3>
+      <p class="modal-sub zh">「<span id="delete-node-name"></span>」及其所有后代都将被焚毁，无法复原。</p>
+      <div class="modal-actions">
+        <button id="btn-delete-cancel" class="pixel-btn pixel-btn-ghost">再想想</button>
+        <button id="btn-delete-confirm" class="pixel-btn pixel-btn-danger">焚毁</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：乾坤袋 ============ -->
+  <div id="qiankun-modal-overlay" class="modal-overlay">
+    <div class="modal modal-wide pixel-panel">
+      <h3 class="modal-title zh">乾坤袋</h3>
+      <p class="modal-sub zh">把存档码发到自己的微信或备忘录，换设备、清缓存都不怕。</p>
+      <textarea id="qiankun-export" class="pixel-input pixel-textarea" readonly></textarea>
+      <div class="modal-actions">
+        <button id="btn-qiankun-copy" class="pixel-btn">一键复制</button>
+      </div>
+      <hr class="qiankun-divider">
+      <label class="modal-label zh">导入存档</label>
+      <textarea id="qiankun-import" class="pixel-input pixel-textarea zh" placeholder="在此粘贴存档码……"></textarea>
+      <p id="qiankun-import-error" class="ritual-error zh"></p>
+      <div class="modal-actions">
+        <button id="btn-qiankun-close" class="pixel-btn pixel-btn-ghost">关闭</button>
+        <button id="btn-qiankun-import" class="pixel-btn">导入存档</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 弹窗：导入确认 ============ -->
+  <div id="qiankun-confirm-overlay" class="modal-overlay">
+    <div class="modal pixel-panel">
+      <h3 class="modal-title zh">导入存档</h3>
+      <p class="modal-sub zh">导入将覆盖当前存档，确定吗？</p>
+      <div class="modal-actions">
+        <button id="btn-qiankun-confirm-cancel" class="pixel-btn pixel-btn-ghost">再想想</button>
+        <button id="btn-qiankun-confirm-ok" class="pixel-btn pixel-btn-danger">确定导入</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/ada.js"></script>
+  <script src="js/quests.js"></script>
+  <script src="js/settle.js"></script>
+  <script src="js/meditation.js"></script>
+  <script src="js/map-ui.js"></script>
+  <script src="js/qiankun.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
